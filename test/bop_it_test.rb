@@ -256,6 +256,22 @@ class BopItEngineTest < Minitest::Test
     assert_in_delta 20.0, fp.now - t0, 1.0
   end
 
+  # --- H / F1 key help ---
+
+  def test_start_screen_help_speaks_hotkeys
+    fp, _, e = fresh
+    fp.press(:help, :bop) # help first, then bop starts the round
+    assert_equal :play, e.send(:start_screen)
+    assert_includes fp.alerts, BopItElten::Engine::HELP_TEXT
+  end
+
+  def test_check_key_help_does_not_consume_the_round
+    fp, _, e = fresh
+    fp.press(:help, :bop) # help then the correct key in the same poll
+    assert_equal :ok, e.send(:check_key, 0, 250)
+    assert_includes fp.alerts, BopItElten::Engine::HELP_TEXT
+  end
+
   # --- run: full session auto-finishes on the very first bop ---
 
   def test_top_level_run_returns_cleanly

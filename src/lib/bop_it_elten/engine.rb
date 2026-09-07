@@ -15,11 +15,11 @@ module BopItElten
   #                    responsive). Any key edges seen during the wait queue
   #                    up for take_pressed.
   #   p.take_pressed   Array<Symbol> of key edges seen since the last call, in
-  #                    order: :bop :twist :pull :level :reset :escape. A held
-  #                    key yields a single edge — the toy must be re-pressed
-  #                    for every action. (The original read held state and
-  #                    needed `while twist end` release-waits; edge semantics
-  #                    make those unnecessary.)
+  #                    order: :bop :twist :pull :level :reset :escape :help. A
+  #                    held key yields a single edge — the toy must be
+  #                    re-pressed for every action. (The original read held
+  #                    state and needed `while twist end` release-waits; edge
+  #                    semantics make those unnecessary.)
   #   p.play(name, volume:)
   #                    Start sound asset `name` (basename, no extension),
   #                    non-blocking, layered over whatever plays.
@@ -38,6 +38,14 @@ module BopItElten
     COMMAND_SOUND = %i[bopit twistit poolit].freeze # spoken/toy ask variants
     SUCCESS_SOUND = { bop: :bopit2, twist: :twistit2, pull: :poolit2 }.freeze
     ACTIONS = %i[bop twist pull].freeze
+
+    # Spoken with alert on H / F1 (there is no built-in Elten F1 help for
+    # programs — see the port notes), for a player who does not know the keys.
+    HELP_TEXT = "Space bops, Enter twists, Tab pulls. Press Space to start. " \
+                "A wrong key ends the round; Escape turns the toy off. " \
+                "On the start screen, Enter changes the volume, M changes the " \
+                "level, and Tab switches to Pass It mode. " \
+                "H or F1 repeats this help.".freeze
 
     # The full clip tour the hidden test mode plays once its replay window
     # lapses — mirrors the original testmode.rb list verbatim.
@@ -128,6 +136,7 @@ module BopItElten
     #   twist  -> cycle volume (blasting -> quiet -> loud, like the toy switch)
     #   M      -> cycle level (only up to what is unlocked)
     #   R      -> hidden developer test mode
+    #   H / F1 -> speak the key help (alert)
     #   escape -> turn the toy off (back to the Elten menu)
     # Idle for IDLE_TIMEOUT_S and the toy "goes to sleep" (returns nil).
     def start_screen
@@ -150,6 +159,8 @@ module BopItElten
             cycle_volume
           when :level
             cycle_level
+          when :help
+            @p.alert(HELP_TEXT)
           end
           wake = @p.now
         end
@@ -282,6 +293,8 @@ module BopItElten
         @p.take_pressed.each do |k|
           if k == :escape
             return :escape
+          elsif k == :help
+            @p.alert(HELP_TEXT) # mid-round help must not consume the round
           elsif k == correct
             sfx(SUCCESS_SOUND[correct])
             littlebit(speed_ms)

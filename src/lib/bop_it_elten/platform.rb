@@ -19,6 +19,9 @@ module BopItElten
   #   pull    Tab    0x09   ("pull it!")
   #   level   M      0x4D   (cycle difficulty; original used getkeychar == "m")
   #   reset   R      0x52   (hidden developer reset / test mode)
+  #   help    H      0x48   (speak the hotkeys) — F1 0x70 does the same: Elten
+  #                          has no built-in F1 help for programs, so both are
+  #                          just keys an app can read itself
   #   escape  Esc    0x1B   (leave the toy)
   #
   # Elten resolves these as raw virtual-key codes — letters are the ASCII
@@ -26,19 +29,24 @@ module BopItElten
   class Platform
     POLL_S = 0.004 # event-loop pump step while the game waits
 
-    KEY = {
-      bop: 0x20,     # Space
-      twist: 0x0D,   # Enter
-      pull: 0x09,    # Tab
-      level: 0x4D,   # M
-      reset: 0x52,   # R
-      escape: 0x1B   # Escape
-    }.freeze
+    # [raw code, engine token] pairs. Two physical keys (H and F1) map to the
+    # same :help token — the engine only ever sees semantic tokens.
+    KEYS = [
+      [0x20, :bop],     # Space
+      [0x0D, :twist],   # Enter
+      [0x09, :pull],    # Tab
+      [0x4D, :level],   # M
+      [0x52, :reset],   # R
+      [0x48, :help],    # H
+      [0x70, :help],    # F1 — alias, Elten has no built-in F1 help to collide
+      [0x1B, :escape]   # Escape
+    ].freeze
 
     # The engine wants key *edges*: a held key yields exactly one action and
     # the toy must be re-pressed for the next one. Elten's key_first_pressed?
-    # stays true while the key is down across frames, so we latch every token
-    # ourselves: an edge is queued only on the false->true transition.
+    # stays true while the key is down across frames, so we latch every raw
+    # code ourselves: an edge is queued only on the false->true transition
+    # (latching by code keeps H and F1 independent even though both emit :help).
     attr_reader :program
 
     def initialize(program)
@@ -120,10 +128,10 @@ module BopItElten
     private
 
     def sample_keys
-      KEY.each do |token, code|
+      KEYS.each do |code, token|
         pressed = key_first_pressed?(code)
-        @queue << token if pressed && !@down[token]
-        @down[token] = pressed
+        @queue << token if pressed && !@down[code]
+        @down[code] = pressed
       end
     end
 
