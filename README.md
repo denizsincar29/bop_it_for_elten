@@ -72,8 +72,8 @@ are mono 44100 Hz, encoded as Vorbis.
 ## Installing into Elten (dev)
 
 Copy `src/` into `<appdata>/elten/apps/src/BopIt` and restart Elten in
-developer mode (Выход → «Перезагрузить в режиме разработчика»), or build a
-signed `.eltsetup` via the GitHub Action on a `v*` tag.
+developer mode (Exit → "Reload in developer mode"), or build a signed
+`.eltsetup` via the GitHub Action on a `v*` tag.
 
 **Windows gotcha (CRLF):** Elten 3's `Elten3AppInfo` parser fails on CRLF
 line endings — the closing `=end Elten3AppInfo` regex misses the trailing
