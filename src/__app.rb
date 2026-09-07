@@ -5,11 +5,13 @@
 {
   "id": "78774b7d-2d15-440e-9502-b5260dc136a6",
   "name": "BopIt",
-  "version": "0.1.0",
-  "build_id": 20260907001,
+  "version": "0.1.1",
+  "build_id": 20260907002,
   "EltenAPIVersion": "3.0",
   "author": "denizsincar29",
   "main_class": "ProgramBopIt",
+  "main_language": "en",
+  "supported_languages": ["en"],
   "platforms": ["all"],
   "required_assets": {
     "sounds": [
