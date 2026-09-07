@@ -34,7 +34,7 @@ ACTIONS_BY = { "bopit" => :bop, "twistit" => :twist, "poolit" => :pull }.freeze
 WRONG = { bop: :pull, twist: :bop, pull: :twist }.freeze
 
 class FakePlatform
-  attr_reader :played, :alerts
+  attr_reader :played, :alerts, :help_opens
   attr_accessor :now, :autopress, :fail_at
 
   def initialize
@@ -42,6 +42,7 @@ class FakePlatform
     @pressed = []
     @played = []
     @alerts = []
+    @help_opens = 0 # how many times open_help (full page) was requested
     @autopress = false
     @pending = nil
     @cmds = 0       # how many commands have been answered correctly
@@ -65,6 +66,12 @@ class FakePlatform
 
   def alert(text)
     @alerts << text.to_s
+  end
+
+  # The real Platform forwards to ProgramBopIt#open_full_help (a modal Form);
+  # the fake just records the request and returns, like the page closing.
+  def open_help
+    @help_opens += 1
   end
 
   def take_pressed
@@ -263,6 +270,7 @@ class BopItEngineTest < Minitest::Test
     fp.press(:help, :bop) # help first, then bop starts the round
     assert_equal :play, e.send(:start_screen)
     assert_includes fp.alerts, BopItElten::Engine::HELP_TEXT
+    assert_equal 0, fp.help_opens, "H speaks, it does not open the page"
   end
 
   def test_check_key_help_does_not_consume_the_round
@@ -270,6 +278,21 @@ class BopItEngineTest < Minitest::Test
     fp.press(:help, :bop) # help then the correct key in the same poll
     assert_equal :ok, e.send(:check_key, 0, 250)
     assert_includes fp.alerts, BopItElten::Engine::HELP_TEXT
+  end
+
+  def test_start_screen_f1_opens_full_help
+    fp, _, e = fresh
+    fp.press(:help_full, :bop) # F1 opens the page, then bop starts the round
+    assert_equal :play, e.send(:start_screen)
+    assert_equal 1, fp.help_opens
+    assert_empty fp.alerts, "F1 opens the page, it does not speak"
+  end
+
+  def test_check_key_f1_does_not_consume_the_round
+    fp, _, e = fresh
+    fp.press(:help_full, :bop) # F1 then the correct key in the same poll
+    assert_equal :ok, e.send(:check_key, 0, 250)
+    assert_equal 1, fp.help_opens
   end
 
   # --- run: full session auto-finishes on the very first bop ---

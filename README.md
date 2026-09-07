@@ -30,7 +30,9 @@ On the start screen (when the toy says "bop it to start"):
   switch on the toy.
 - **M** — the small button on the toy's body: cycle the level (Novice /
   Expert / Master, only the unlocked ones).
-- **H / F1** — speak this help (handy when you do not know the keys yet).
+- **H** — speak the short key list (handy when you do not know the keys yet).
+- **F1** — open the full written help; it also appears once on a fresh
+  install.
 
 ### Pass It mode
 

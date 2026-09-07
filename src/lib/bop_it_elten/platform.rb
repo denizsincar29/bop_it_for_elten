@@ -19,9 +19,10 @@ module BopItElten
   #   pull    Tab    0x09   ("pull it!")
   #   level   M      0x4D   (cycle difficulty; original used getkeychar == "m")
   #   reset   R      0x52   (hidden developer reset / test mode)
-  #   help    H      0x48   (speak the hotkeys) — F1 0x70 does the same: Elten
-  #                          has no built-in F1 help for programs, so both are
-  #                          just keys an app can read itself
+  #   help    H      0x48   (speak the short hotkeys)
+  #   help_full F1   0x70   (open the full markdown help — Elten 3 has no
+  #                          built-in F1 help for programs, so F1 is just a
+  #                          key we read ourselves)
   #   escape  Esc    0x1B   (leave the toy)
   #
   # Elten resolves these as raw virtual-key codes — letters are the ASCII
@@ -29,24 +30,23 @@ module BopItElten
   class Platform
     POLL_S = 0.004 # event-loop pump step while the game waits
 
-    # [raw code, engine token] pairs. Two physical keys (H and F1) map to the
-    # same :help token — the engine only ever sees semantic tokens.
+    # [raw code, engine token] pairs. H and F1 stay distinct: H speaks the
+    # short hotkeys, F1 opens the full help page.
     KEYS = [
-      [0x20, :bop],     # Space
-      [0x0D, :twist],   # Enter
-      [0x09, :pull],    # Tab
-      [0x4D, :level],   # M
-      [0x52, :reset],   # R
-      [0x48, :help],    # H
-      [0x70, :help],    # F1 — alias, Elten has no built-in F1 help to collide
-      [0x1B, :escape]   # Escape
+      [0x20, :bop],       # Space
+      [0x0D, :twist],     # Enter
+      [0x09, :pull],      # Tab
+      [0x4D, :level],     # M
+      [0x52, :reset],     # R
+      [0x48, :help],      # H       — short hotkeys
+      [0x70, :help_full], # F1      — full markdown help
+      [0x1B, :escape]     # Escape
     ].freeze
 
     # The engine wants key *edges*: a held key yields exactly one action and
     # the toy must be re-pressed for the next one. Elten's key_first_pressed?
     # stays true while the key is down across frames, so we latch every raw
-    # code ourselves: an edge is queued only on the false->true transition
-    # (latching by code keeps H and F1 independent even though both emit :help).
+    # code ourselves: an edge is queued only on the false->true transition.
     attr_reader :program
 
     def initialize(program)
@@ -123,6 +123,14 @@ module BopItElten
     # keeps running and the player can act while it is still talking.
     def alert(text)
       speak(text.to_s)
+    end
+
+    # Open the full markdown help and block until the player closes it. The
+    # Form is built by the Program (control classes resolve there — this
+    # plain class predates the Elten namespace); the engine only needs to
+    # know the platform can show help on demand.
+    def open_help
+      @program.open_full_help if @program.respond_to?(:open_full_help)
     end
 
     private
