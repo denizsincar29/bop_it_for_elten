@@ -6,12 +6,12 @@
   "id": "78774b7d-2d15-440e-9502-b5260dc136a6",
   "name": "BopIt",
   "version": "0.1.3",
-  "build_id": 20260907004,
+  "build_id": 20260907005,
   "EltenAPIVersion": "3.0",
   "author": "denizsincar29",
   "main_class": "ProgramBopIt",
   "main_language": "en",
-  "supported_languages": ["en"],
+  "supported_languages": ["en", "de", "es", "fr", "it", "pl", "pt", "ru", "tr", "uk"],
   "platforms": ["all"],
   "required_assets": {
     "sounds": [
@@ -56,6 +56,12 @@ require_relative "lib/bop_it_elten/help"
 # inside a Program/Scene subclass. The engine asks for it through
 # Platform#open_help, which forwards to open_full_help when present.
 class ProgramBopIt < Program
+  # Public beta-testing group, opened by the join button in the full help.
+  # Empty -> the button is hidden (guards a half-configured build). A Telegram
+  # invite (https://t.me/...) opens in Elten's external browser; an Elten
+  # forum group opens in-client as elten://forum/group/<id>.
+  BETA_GROUP_URL = "".freeze
+
   def main
     platform = BopItElten::Platform.new(self)
     store = BopItElten::Store.new(self)
@@ -74,21 +80,56 @@ class ProgramBopIt < Program
     finish
   end
 
+  # Elten's gettext reads .mo strings as ASCII-8BIT; re-tag to UTF-8 so the
+  # markdown and UI literals never raise Encoding::CompatibilityError. A
+  # missing or empty catalog entry makes Elten return nil (or empty) — fall
+  # back to the English msgid instead of crashing. Same idiom as Mile by Mile.
+  def _(msgid)
+    text = super(msgid)
+    return msgid if text.nil? || text.empty?
+    text.dup.force_encoding(Encoding::UTF_8)
+  end
+
+  # Public entry the plain Platform classes use to translate engine text at
+  # the alert boundary (Elten's _ is private and lives on Object, not on the
+  # helpers).
+  def localize(msgid)
+    _(msgid)
+  end
+
   # The full manual in a read-only markdown field, mirroring Elten's own
-  # documentation window (documentation.rb): MarkDown flag renders the text,
-  # quiet read-only EditBox, Close button doubles as accept and cancel so
-  # Enter / Escape both leave. Blocks until the player closes it.
+  # documentation window (documentation.rb): the MarkDown flag renders the
+  # text, quiet read-only EditBox. Close doubles as accept and cancel so
+  # Enter / Escape both leave; the join button opens the beta group once the
+  # window closes. Blocks until the player leaves.
   def open_full_help
     box = EditBox.new(
-      "Bop It — Help",
+      _(BopItElten::Help::TITLE),
       type: EditBox::Flags::ReadOnly | EditBox::Flags::MultiLine | EditBox::Flags::MarkDown,
-      text: BopItElten::Help::FULL_HELP,
+      text: _(BopItElten::Help::FULL_HELP),
       quiet: true
     )
-    close = Button.new("Close")
-    form = Form.new([box, close], index: 0, quiet: true)
+    controls = [box]
+    action = :close
+    join = nil
+    if !BETA_GROUP_URL.empty?
+      join = Button.new(_(BopItElten::Help::JOIN_BETA))
+      controls << join
+    end
+    close = Button.new(_(BopItElten::Help::CLOSE))
+    controls << close
+
+    form = Form.new(controls, index: 0, quiet: true)
+    if join != nil
+      join.on(:press) do
+        action = :join
+        form.resume
+      end
+    end
     close.on(:press) { form.resume }
-    form.accept_button = form.cancel_button = close
+    form.accept_button = close
+    form.cancel_button = close
     form.wait
+    process_url(BETA_GROUP_URL) if action == :join
   end
 end

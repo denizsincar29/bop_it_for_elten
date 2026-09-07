@@ -8,7 +8,18 @@ module BopItElten
   # F1 opens it on demand; the UI layer also opens it once on a fresh install
   # (no "helped" flag in the high-score store yet).
   module Help
-    FULL_HELP = <<~MARKDOWN
+    # Short UI strings, single-sourced here so the English msgids in the
+    # locale catalogs match the code exactly (the Elten dictionary keys on
+    # the literal English text). The full manual is one big msgid too, so the
+    # whole help window follows Elten's UI language at once.
+    TITLE = "Bop It — Help".freeze
+    CLOSE = "Close".freeze
+    JOIN_BETA = "Join the beta testing group".freeze
+
+    # The trailing-newline chomp keeps the English msgid the locale generator
+    # extracts byte-stable (tools/build_locales.py reproduces this dedent +
+    # chomp; test/bop_it_test.rb re-verifies parity against the .mo files).
+    FULL_HELP = <<~MARKDOWN.chomp
       # Bop It for Elten 3
 
       A fast reaction game. The toy calls out a command — **bop it**, **twist

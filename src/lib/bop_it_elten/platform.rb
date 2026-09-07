@@ -119,10 +119,15 @@ module BopItElten
       sleep_s(extra.to_f) if extra.to_f.positive?
     end
 
-    # Momentary spoken cue (the "reset" alert). speak is async so the engine
-    # keeps running and the player can act while it is still talking.
+    # Momentary spoken cue (the "reset" alert, the short H help). speak is
+    # async so the engine keeps running and the player can act while it is
+    # still talking. The engine speaks English msgids; the Program translates
+    # them through the Elten dictionary at this boundary (missing catalogs
+    # fall back to the English msgid unchanged).
     def alert(text)
-      speak(text.to_s)
+      str = text.to_s
+      str = @program.localize(str) if @program.respond_to?(:localize)
+      speak(str)
     end
 
     # Open the full markdown help and block until the player closes it. The

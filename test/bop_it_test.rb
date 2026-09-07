@@ -10,6 +10,7 @@
 
 require "minitest/autorun"
 require_relative "../src/lib/bop_it_elten/engine"
+require_relative "../src/lib/bop_it_elten/help"
 
 # Persistence double: section/key -> string, like the read/write json store
 # the UI layer will provide.
@@ -303,5 +304,63 @@ class BopItEngineTest < Minitest::Test
     fp.press(:bop)
     e.run
     assert_equal 100, e.instance_variable_get(:@scores)[0]
+  end
+end
+
+# --- locale catalogs: every .mo msgid must byte-match a Ruby constant -------
+#
+# Elten's dictionary keys on the literal English string the code passes to _()
+# (the whole manual is one key). If tools/build_locales.py ever extracts a
+# msgid that differs from what Ruby actually holds in HELP_TEXT / FULL_HELP /
+# TITLE / CLOSE / JOIN_BETA — a heredoc edge, a stray space, a trailing
+# newline — that language silently falls back to English at runtime. So CI
+# decodes each shipped .mo and asserts key-for-key parity with the constants,
+# plus a non-empty, actually-translated value.
+
+class LocaleCatalogTest < Minitest::Test
+  LOCALES = %w[de es fr it pl pt ru tr uk].freeze
+  LOCALE_DIR = File.expand_path("../src/locale", __dir__)
+
+  def decode_mo(path)
+    data = File.binread(path)
+    _magic, _rev, n, o_off, t_off, _hsz, _hoff = data.unpack("V7")
+    read_table = lambda do |table_off|
+      n.times.map do |i|
+        len, at = data.byteslice(table_off + i * 8, 8).unpack("V2")
+        data.byteslice(at, len).dup.force_encoding(Encoding::UTF_8)
+      end
+    end
+    read_table.call(o_off).zip(read_table.call(t_off)).to_h
+  end
+
+  def test_catalog_msgids_match_constants_and_are_translated
+    expected = {
+      BopItElten::Help::TITLE => :title,
+      BopItElten::Help::CLOSE => :close,
+      BopItElten::Help::JOIN_BETA => :join_button,
+      BopItElten::Help::FULL_HELP => :manual,
+      BopItElten::Engine::HELP_TEXT => :help_speech,
+      "reset" => :reset
+    }
+    LOCALES.each do |code|
+      cat = decode_mo(File.join(LOCALE_DIR, "#{code}.mo"))
+      assert_equal expected.size, cat.size, "#{code}: unexpected msgid count"
+      expected.each do |msgid, kind|
+        assert cat.key?(msgid),
+               "#{code}: catalog lacks the #{kind} msgid (#{msgid[0, 40].inspect}...)"
+        refute_empty cat[msgid], "#{code}: empty translation for #{kind}"
+        refute_equal msgid, cat[msgid], "#{code}: #{kind} not translated" unless kind == :reset
+      end
+    end
+  end
+
+  def test_manual_translations_keep_markdown_structure
+    LOCALES.each do |code|
+      cat = decode_mo(File.join(LOCALE_DIR, "#{code}.mo"))
+      manual = cat[BopItElten::Help::FULL_HELP]
+      assert manual.include?("## "), "#{code}: manual lost its markdown headings"
+      assert manual.include?("- **"), "#{code}: manual lost its key bullets"
+      assert manual.start_with?("# "), "#{code}: manual lost its title heading"
+    end
   end
 end
