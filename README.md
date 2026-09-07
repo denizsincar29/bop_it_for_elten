@@ -3,8 +3,9 @@
 A port of the classic reaction toy to the Elten 3 API. Follow the voice
 commands: **bop it**, **twist it**, **pull it** — and don't be late.
 Originally written by Deniz Sincar (bomberman29) for Elten 2; this repo
-re-implements the same game on Elten 3 (the AudioMemory / Purrposterous /
-Mile-by-Mile sample lineage from pajper).
+re-implements the same game on Elten 3. The mechanics are copied from the
+Bop It Shout (2008) toy — the game loop, the metronome pace and the spoken
+commands — minus the Shout It command.
 
 ## How to play
 
@@ -25,8 +26,10 @@ On the start screen (when the toy says "bop it to start"):
 
 - **Bop it** — start a game.
 - **Pull it** — toggle Solo / Pass It mode.
-- **Twist it** — cycle the level (Novice / Expert / Master, only unlocked ones).
-- **M** — also changes level (the original "level button").
+- **Twist it** — cycle the volume (Quiet / Loud / Blasting), like the volume
+  switch on the toy.
+- **M** — the small button on the toy's body: cycle the level (Novice /
+  Expert / Master, only the unlocked ones).
 
 ### Pass It mode
 
