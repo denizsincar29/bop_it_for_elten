@@ -1,0 +1,10 @@
+*.gem
+.bundle/
+vendor/bundle/
+.byebug_history
+
+# собранные пакеты и локальные референсы не коммитим
+*.eltenapp
+refs/
+
+*.eltsetup
