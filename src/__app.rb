@@ -5,8 +5,8 @@
 {
   "id": "78774b7d-2d15-440e-9502-b5260dc136a6",
   "name": "BopIt",
-  "version": "0.1.3",
-  "build_id": 20260907005,
+  "version": "0.1.4",
+  "build_id": 20260908001,
   "EltenAPIVersion": "3.0",
   "author": "denizsincar29",
   "main_class": "ProgramBopIt",

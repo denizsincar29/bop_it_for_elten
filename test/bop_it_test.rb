@@ -362,7 +362,8 @@ class LocaleCatalogTest < Minitest::Test
       cat = decode_mo(File.join(LOCALE_DIR, "#{code}.mo"))
       manual = cat[BopItElten::Help::FULL_HELP]
       assert manual.include?("## "), "#{code}: manual lost its markdown headings"
-      assert manual.include?("- **"), "#{code}: manual lost its key bullets"
+      assert manual.include?("- "), "#{code}: manual lost its key bullets"
+      refute_includes manual, "**", "#{code}: Elten prints literal stars, bold must stay out"
       assert manual.start_with?("# "), "#{code}: manual lost its title heading"
     end
   end

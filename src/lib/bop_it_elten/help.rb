@@ -22,42 +22,42 @@ module BopItElten
     FULL_HELP = <<~MARKDOWN.chomp
       # Bop It for Elten 3
 
-      A fast reaction game. The toy calls out a command — **bop it**, **twist
-      it** or **pull it** — and you must hit the matching key before the
+      A fast reaction game. The toy calls out a command — bop it, twist
+      it or pull it — and you must hit the matching key before the
       metronome runs out. A wrong key or a pause ends the round.
 
       ## The original
 
-      The mechanics are copied from the **Bop It Shout** toy by Hasbro
+      The mechanics are copied from the Bop It Shout toy by Hasbro
       (2008), which made the whole room play: one person held the toy while
       everyone shouted the commands together. This port keeps the three
-      classic moves and leaves out the **Shout It** command.
+      classic moves and leaves out the Shout It command.
 
       ## Playing with the keys
 
-      - **Space** — bop it.
-      - **Enter** — twist it.
-      - **Tab** — pull it.
-      - **Escape** — turn the toy off.
+      - Space — bop it.
+      - Enter — twist it.
+      - Tab — pull it.
+      - Escape — turn the toy off.
 
-      A round lasts until you miss or complete **100 correct moves**. The
+      A round lasts until you miss or complete 100 correct moves. The
       commands speed up the longer you survive.
 
       ## On the start screen
 
       While the toy says "bop it to start", the keys do extra things:
 
-      - **Space** — start a game.
-      - **Enter** — change the volume (quiet, loud, blasting), like the
+      - Space — start a game.
+      - Enter — change the volume (quiet, loud, blasting), like the
         switch on the real toy.
-      - **M** — the small button on the toy's body: pick the level.
-      - **Tab** — switch between Solo and Pass It.
-      - **H** — repeat the short key list.
-      - **F1** — reopen this page.
+      - M — the small button on the toy's body: pick the level.
+      - Tab — switch between Solo and Pass It.
+      - H — repeat the short key list.
+      - F1 — reopen this page.
 
       ## Levels
 
-      There are three: **Novice**, **Expert** and **Master**. Novice calls
+      There are three: Novice, Expert and Master. Novice calls
       the command by name, Expert plays the toy's sound, Master mixes both.
       Beat a level with 100 moves to unlock the next one.
 
@@ -69,7 +69,7 @@ module BopItElten
 
       ## About this port
 
-      Written by Deniz Sincar, this version recreates the toy on **Elten 3**.
+      Written by Deniz Sincar, this version recreates the toy on Elten 3.
       The game logic is a faithful port of his original Elten 2 edition,
       built on the Bop It Shout mechanics, and the voice and effect sounds
       were recorded from a real Bop It unit. The engine is kept free of
