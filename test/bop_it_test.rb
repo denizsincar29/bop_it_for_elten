@@ -330,7 +330,10 @@ class LocaleCatalogTest < Minitest::Test
         data.byteslice(at, len).dup.force_encoding(Encoding::UTF_8)
       end
     end
-    read_table.call(o_off).zip(read_table.call(t_off)).to_h
+    pairs = read_table.call(o_off).zip(read_table.call(t_off)).to_h
+    pairs.delete("") # the gettext header entry (msgid "") is catalog metadata,
+                     # not a UI string — never count it in the parity check
+    pairs
   end
 
   def test_catalog_msgids_match_constants_and_are_translated
