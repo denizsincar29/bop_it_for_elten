@@ -60,7 +60,7 @@ class ProgramBopIt < Program
   # Empty -> the button is hidden (guards a half-configured build). A Telegram
   # invite (https://t.me/...) opens in Elten's external browser; an Elten
   # forum group opens in-client as elten://forum/group/<id>.
-  BETA_GROUP_URL = "".freeze
+  BETA_GROUP_URL = "elten://forum/group/1235".freeze
 
   def main
     platform = BopItElten::Platform.new(self)
